@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mochi — Provider Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #f8faff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #1e1b2e;
+    }
+
+    header {
+      background: white;
+      border-bottom: 1px solid #e8e0f0;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-logo { font-size: 1.5rem; }
+    .header-title { font-size: 1.1rem; font-weight: 700; color: #7c4f9a; }
+    .header-sub { font-size: 0.78rem; color: #a07cb8; }
+
+    .back-link {
+      font-size: 0.82rem;
+      color: #9b6bc8;
+      text-decoration: none;
+      padding: 6px 14px;
+      border: 1.5px solid #e0d0f0;
+      border-radius: 16px;
+      background: white;
+    }
+    .back-link:hover { background: #f5eeff; }
+
+    main { max-width: 900px; margin: 0 auto; padding: 28px 20px; display: flex; flex-direction: column; gap: 24px; }
+
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a07cb8;
+      margin-bottom: 12px;
+    }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+    .stat-card {
+      background: white;
+      border-radius: 18px;
+      padding: 18px 16px;
+      box-shadow: 0 2px 12px rgba(124,79,154,0.07);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-icon { font-size: 1.4rem; margin-bottom: 4px; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: #7c4f9a; }
+    .stat-label { font-size: 0.75rem; color: #a07cb8; }
+
+    /* 7-day calendar */
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(124,79,154,0.07);
+    }
+
+    .week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+
+    .day-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .day-label { font-size: 0.7rem; color: #b09ac8; font-weight: 600; }
+
+    .day-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .day-dot.has-meal { background: linear-gradient(135deg, #f9a8d4, #c4b5fd); color: #5a3070; }
+    .day-dot.no-meal  { background: #f0e8f8; color: #c4b5fd; }
+    .day-dot.today    { box-shadow: 0 0 0 2px #7c4f9a; }
+
+    .day-meals { font-size: 0.68rem; color: #b09ac8; }
+
+    /* State distribution */
+    .state-bars { display: flex; flex-direction: column; gap: 10px; }
+
+    .state-bar-row { display: flex; align-items: center; gap: 10px; }
+    .state-bar-label { font-size: 0.8rem; color: #3d2b4a; width: 90px; flex-shrink: 0; }
+    .state-bar-track { flex: 1; height: 10px; background: #f0e8f8; border-radius: 10px; overflow: hidden; }
+    .state-bar-fill  { height: 100%; border-radius: 10px; transition: width 0.8s ease; }
+    .state-bar-count { font-size: 0.75rem; color: #b09ac8; width: 30px; text-align: right; flex-shrink: 0; }
+
+    /* Distress events */
+    .event-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .event-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #fff8f0;
+      border: 1px solid #fed7aa;
+      border-radius: 12px;
+      font-size: 0.82rem;
+    }
+
+    .event-item.distressed { background: #fff0f0; border-color: #fca5a5; }
+
+    .event-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .event-dot.worried    { background: #f97316; }
+    .event-dot.distressed { background: #ef4444; }
+    .event-time { color: #a07cb8; font-size: 0.75rem; margin-left: auto; }
+
+    /* Meal log */
+    .meal-list { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+    .meal-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: #faf0ff;
+      border-radius: 10px;
+      font-size: 0.82rem;
+    }
+    .meal-time { color: #b09ac8; font-size: 0.75rem; margin-left: auto; }
+
+    .empty-state { color: #c4b5fd; font-size: 0.85rem; text-align: center; padding: 20px; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-logo">🍙</div>
+    <div>
+      <div class="header-title">Provider Dashboard</div>
+      <div class="header-sub">Mochi Patient Companion — between-session insights</div>
+    </div>
+  </div>
+  <a href="/" class="back-link">← Back to Mochi</a>
+</header>
+
+<main>
+
+  <!-- Stats -->
+  <div>
+    <div class="section-title">This week at a glance</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🍽️</div>
+        <div class="stat-value" id="statMeals">—</div>
+        <div class="stat-label">Meals logged (7d)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value" id="statStreak">—</div>
+        <div class="stat-label">Day streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value" id="statMessages">—</div>
+        <div class="stat-label">Messages sent</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-value" id="statDistress">—</div>
+        <div class="stat-label">Distress events (7d)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7-day meal calendar -->
+  <div class="card">
+    <div class="section-title">7-day meal activity</div>
+    <div class="week-grid" id="weekGrid"></div>
+  </div>
+
+  <!-- Two column: state distribution + distress events -->
+  <div class="two-col">
+    <div class="card">
+      <div class="section-title">Mood state distribution (7d)</div>
+      <div class="state-bars" id="stateBars"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Distress events</div>
+      <div class="event-list" id="eventList"></div>
+    </div>
+  </div>
+
+  <!-- Full meal log -->
+  <div class="card">
+    <div class="section-title">Meal log</div>
+    <div class="meal-list" id="mealList"></div>
+  </div>
+
+</main>
+
+<script>
+  function getMealLog()     { return JSON.parse(localStorage.getItem('mochi_mealLog') || '[]'); }
+  function getDistressLog() { return JSON.parse(localStorage.getItem('mochi_distressLog') || '[]'); }
+  function getMessageCount(){ return parseInt(localStorage.getItem('mochi_msgCount') || '0'); }
+
+  function computeStreak() {
+    const log = getMealLog();
+    if (!log.length) return 0;
+    const days = [...new Set(log.map(m => new Date(m.timestamp).toDateString()))].sort();
+    let streak = 0, check = new Date();
+    for (let i = days.length - 1; i >= 0; i--) {
+      if (days[i] === check.toDateString()) { streak++; check.setDate(check.getDate() - 1); }
+      else break;
+    }
+    return streak;
+  }
+
+  function formatTime(ts) {
+    return new Date(ts).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function sevenDaysAgo() { return Date.now() - 7 * 86400000; }
+
+  const meals = getMealLog();
+  const distress = getDistressLog();
+  const recentMeals = meals.filter(m => m.timestamp > sevenDaysAgo());
+  const recentDistress = distress.filter(d => d.timestamp > sevenDaysAgo());
+
+  // Stats
+  document.getElementById('statMeals').textContent = recentMeals.length;
+  document.getElementById('statStreak').textContent = computeStreak();
+  document.getElementById('statMessages').textContent = getMessageCount();
+  document.getElementById('statDistress').textContent = recentDistress.length;
+
+  // Week grid
+  const weekGrid = document.getElementById('weekGrid');
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  for (let d = 6; d >= 0; d--) {
+    const date = new Date(); date.setDate(date.getDate() - d); date.setHours(0,0,0,0);
+    const next = new Date(date); next.setDate(next.getDate() + 1);
+    const dayMeals = meals.filter(m => m.timestamp >= date.getTime() && m.timestamp < next.getTime());
+    const isToday = d === 0;
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+    cell.innerHTML = `
+      <div class="day-label">${dayNames[date.getDay()]}</div>
+      <div class="day-dot ${dayMeals.length ? 'has-meal' : 'no-meal'} ${isToday ? 'today' : ''}">${dayMeals.length || '–'}</div>
+      <div class="day-meals">${dayMeals.length ? `${dayMeals.length} meal${dayMeals.length>1?'s':''}` : 'none'}</div>
+    `;
+    weekGrid.appendChild(cell);
+  }
+
+  // State distribution (approximate from meal gaps)
+  const stateColors = {
+    ecstatic:   '#f9a8d4',
+    happy:      '#c4b5fd',
+    content:    '#93c5fd',
+    worried:    '#fb923c',
+    distressed: '#f87171',
+  };
+  const stateLabels = { ecstatic: '🌸 Ecstatic', happy: '😊 Happy', content: '🌿 Content', worried: '😟 Worried', distressed: '🥺 Distressed' };
+  const stateCounts = { ecstatic: 0, happy: 0, content: 0, worried: 0, distressed: 0 };
+
+  recentDistress.forEach(e => {
+    if (stateCounts[e.state] !== undefined) stateCounts[e.state]++;
+  });
+  // Infer happy/content from meal activity
+  stateCounts.happy = Math.max(0, recentMeals.length - recentDistress.length);
+  stateCounts.content = Math.max(0, 7 - recentMeals.length);
+
+  const maxCount = Math.max(...Object.values(stateCounts), 1);
+  const barsEl = document.getElementById('stateBars');
+  Object.entries(stateLabels).forEach(([key, label]) => {
+    const count = stateCounts[key];
+    const pct = Math.round((count / maxCount) * 100);
+    barsEl.innerHTML += `
+      <div class="state-bar-row">
+        <div class="state-bar-label">${label}</div>
+        <div class="state-bar-track"><div class="state-bar-fill" style="width:${pct}%;background:${stateColors[key]}"></div></div>
+        <div class="state-bar-count">${count}</div>
+      </div>`;
+  });
+
+  // Distress events
+  const eventEl = document.getElementById('eventList');
+  if (!distress.length) {
+    eventEl.innerHTML = '<div class="empty-state">No distress events recorded</div>';
+  } else {
+    [...distress].reverse().slice(0, 10).forEach(e => {
+      eventEl.innerHTML += `
+        <div class="event-item ${e.state}">
+          <div class="event-dot ${e.state}"></div>
+          <span>${e.state === 'distressed' ? '🥺 Distressed' : '😟 Worried'}</span>
+          <span class="event-time">${formatTime(e.timestamp)}</span>
+        </div>`;
+    });
+  }
+
+  // Meal log
+  const mealEl = document.getElementById('mealList');
+  if (!meals.length) {
+    mealEl.innerHTML = '<div class="empty-state">No meals logged yet</div>';
+  } else {
+    [...meals].reverse().forEach(m => {
+      mealEl.innerHTML += `
+        <div class="meal-item">
+          <span>🍽️</span>
+          <span>${m.message}</span>
+          <span class="meal-time">${formatTime(m.timestamp)}</span>
+        </div>`;
+    });
+  }
+</script>
+</body>
+</html>

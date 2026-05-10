@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mochi — Weekly Summary</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f8faff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #1e1b2e;
+      padding: 24px 20px;
+    }
+
+    .no-print {
+      max-width: 700px;
+      margin: 0 auto 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 16px;
+      border: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary { background: linear-gradient(135deg, #7c4f9a, #9b6bc8); color: white; }
+    .btn-secondary { background: white; border: 1.5px solid #e0d0f0; color: #7c4f9a; }
+
+    .report {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      padding: 36px 40px;
+      box-shadow: 0 2px 20px rgba(124,79,154,0.1);
+    }
+
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0e8f8;
+    }
+
+    .report-logo { font-size: 2rem; }
+    .report-title { font-size: 1.3rem; font-weight: 700; color: #7c4f9a; }
+    .report-subtitle { font-size: 0.82rem; color: #a07cb8; margin-top: 2px; }
+    .report-date { font-size: 0.78rem; color: #b09ac8; text-align: right; }
+
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a07cb8;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #f0e8f8;
+    }
+
+    /* Summary stats */
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .summary-stat {
+      background: #faf0ff;
+      border-radius: 14px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .summary-stat-value { font-size: 1.6rem; font-weight: 700; color: #7c4f9a; }
+    .summary-stat-label { font-size: 0.7rem; color: #a07cb8; margin-top: 2px; }
+
+    /* Day by day */
+    .day-row {
+      display: flex;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f8f0ff;
+      align-items: flex-start;
+    }
+
+    .day-row:last-child { border-bottom: none; }
+
+    .day-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #7c4f9a;
+      width: 50px;
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+
+    .day-date { font-size: 0.7rem; color: #b09ac8; font-weight: 400; }
+
+    .day-meals-list { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+    .meal-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: linear-gradient(135deg, #fdf0f8, #f5eeff);
+      border: 1px solid #f0d0f0;
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      color: #7c4f9a;
+    }
+
+    .meal-chip-time { font-size: 0.68rem; color: #b09ac8; }
+
+    .no-meals {
+      font-size: 0.78rem;
+      color: #d4c0e8;
+      font-style: italic;
+    }
+
+    .distress-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff0f0;
+      border: 1px solid #fca5a5;
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      color: #dc2626;
+    }
+
+    /* Notes */
+    .notes-box {
+      background: #faf8ff;
+      border: 1.5px dashed #e0d0f0;
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 80px;
+      font-size: 0.82rem;
+      color: #b09ac8;
+      font-style: italic;
+    }
+
+    .report-footer {
+      margin-top: 28px;
+      padding-top: 16px;
+      border-top: 1px solid #f0e8f8;
+      font-size: 0.72rem;
+      color: #c4b5fd;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .no-print { display: none; }
+      .report { box-shadow: none; border-radius: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="no-print">
+  <a href="/" style="text-decoration:none"><button class="btn btn-secondary">← Back to Mochi</button></a>
+  <a href="/dashboard.html" style="text-decoration:none"><button class="btn btn-secondary">📊 Dashboard</button></a>
+  <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save PDF</button>
+</div>
+
+<div class="report">
+  <div class="report-header">
+    <div>
+      <div class="report-logo">🍙</div>
+      <div class="report-title">Weekly Progress Summary</div>
+      <div class="report-subtitle">Mochi Patient Companion — for sharing with your care team</div>
+    </div>
+    <div class="report-date" id="reportDate"></div>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="section">
+    <div class="section-title">Week at a glance</div>
+    <div class="summary-stats">
+      <div class="summary-stat">
+        <div class="summary-stat-value" id="totalMeals">—</div>
+        <div class="summary-stat-label">Meals logged</div>
+      </div>
+      <div class="summary-stat">
+        <div class="summary-stat-value" id="activeDays">—</div>
+        <div class="summary-stat-label">Active days</div>
+      </div>
+      <div class="summary-stat">
+        <div class="summary-stat-value" id="currentStreak">—</div>
+        <div class="summary-stat-label">Day streak</div>
+      </div>
+      <div class="summary-stat">
+        <div class="summary-stat-value" id="distressEvents">—</div>
+        <div class="summary-stat-label">Distress events</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day-by-day -->
+  <div class="section">
+    <div class="section-title">Day-by-day breakdown</div>
+    <div id="dayByDay"></div>
+  </div>
+
+  <!-- Notes for therapist -->
+  <div class="section">
+    <div class="section-title">Notes for your therapist</div>
+    <div class="notes-box" contenteditable="true">Click here to add notes before sharing...</div>
+  </div>
+
+  <div class="report-footer">
+    <span>Generated by Mochi Companion App</span>
+    <span id="footerDate"></span>
+  </div>
+</div>
+
+<script>
+  function getMealLog()     { return JSON.parse(localStorage.getItem('mochi_mealLog') || '[]'); }
+  function getDistressLog() { return JSON.parse(localStorage.getItem('mochi_distressLog') || '[]'); }
+
+  function computeStreak() {
+    const log = getMealLog();
+    if (!log.length) return 0;
+    const days = [...new Set(log.map(m => new Date(m.timestamp).toDateString()))].sort();
+    let streak = 0, check = new Date();
+    for (let i = days.length - 1; i >= 0; i--) {
+      if (days[i] === check.toDateString()) { streak++; check.setDate(check.getDate() - 1); }
+      else break;
+    }
+    return streak;
+  }
+
+  function formatTimeShort(ts) {
+    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  const now = new Date();
+  const weekStart = new Date(now); weekStart.setDate(weekStart.getDate() - 6); weekStart.setHours(0,0,0,0);
+
+  const dateStr = `Week of ${weekStart.toLocaleDateString([], {month:'long',day:'numeric'})} – ${now.toLocaleDateString([], {month:'long',day:'numeric',year:'numeric'})}`;
+  document.getElementById('reportDate').textContent = dateStr;
+  document.getElementById('footerDate').textContent = now.toLocaleDateString();
+
+  const meals = getMealLog();
+  const distress = getDistressLog();
+  const recentMeals = meals.filter(m => m.timestamp >= weekStart.getTime());
+  const recentDistress = distress.filter(d => d.timestamp >= weekStart.getTime());
+
+  const activeDays = new Set(recentMeals.map(m => new Date(m.timestamp).toDateString())).size;
+
+  document.getElementById('totalMeals').textContent = recentMeals.length;
+  document.getElementById('activeDays').textContent = activeDays;
+  document.getElementById('currentStreak').textContent = computeStreak();
+  document.getElementById('distressEvents').textContent = recentDistress.length;
+
+  // Day by day
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const dayEl = document.getElementById('dayByDay');
+
+  for (let d = 6; d >= 0; d--) {
+    const date = new Date(); date.setDate(date.getDate() - d); date.setHours(0,0,0,0);
+    const next = new Date(date); next.setDate(next.getDate() + 1);
+
+    const dayMeals = meals.filter(m => m.timestamp >= date.getTime() && m.timestamp < next.getTime());
+    const dayDistress = distress.filter(e => e.timestamp >= date.getTime() && e.timestamp < next.getTime());
+    const isToday = d === 0;
+
+    let mealsHTML = '';
+    if (dayMeals.length) {
+      mealsHTML = dayMeals.map(m =>
+        `<div class="meal-chip">🍽️ ${m.message} <span class="meal-chip-time">${formatTimeShort(m.timestamp)}</span></div>`
+      ).join('');
+    } else {
+      mealsHTML = '<div class="no-meals">No meals logged</div>';
+    }
+
+    const distressHTML = dayDistress.map(e =>
+      `<div class="distress-chip">${e.state === 'distressed' ? '🥺' : '😟'} ${e.state} at ${formatTimeShort(e.timestamp)}</div>`
+    ).join('');
+
+    dayEl.innerHTML += `
+      <div class="day-row">
+        <div class="day-name">
+          ${dayNames[date.getDay()].slice(0,3)}<br/>
+          <span class="day-date">${date.toLocaleDateString([],{month:'short',day:'numeric'})}${isToday?' ·today':''}</span>
+        </div>
+        <div class="day-meals-list">
+          ${mealsHTML}
+          ${distressHTML}
+        </div>
+      </div>`;
+  }
+</script>
+</body>
+</html>
